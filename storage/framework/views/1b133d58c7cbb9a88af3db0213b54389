@@ -1,0 +1,42 @@
+<?php $__env->startSection('content'); ?>
+
+    <div class="wait-container">
+        <div class="wait-item">
+            <div class="wait-states">
+                <span class="p-name"><?php echo e($order->model->classification->name); ?></span>
+                <span class="p-type"><?php echo e($order->model->name); ?></span>
+                <div class="wait-state">
+                    <?php $orderPresenter = app('Icoming\Presenters\Home\OrderInfoPresenter'); ?>
+                    <?php echo e($orderPresenter->getRecycleStatus($order)); ?>
+
+                </div>
+            </div>
+            <div class="wait-datas">
+                <div class="f-data">
+                    <span class="contacts-name"><?php echo e($order->name); ?></span>
+                    <span class="contacts-number"><?php echo e($order->mobile); ?></span>
+                    <a href="tel:<?php echo e($order->mobile); ?>"><img src="/assets/home/img/tel.png"></a>
+                </div>
+                <div class="recycle-address">
+                    <span class="address-detail">
+                        <?php $plotPresenter = app('Icoming\Presenters\Home\PlotFullNamePresenter'); ?>
+                        <?php echo e($plotPresenter->getFullName($order->plot_id, $order->address)); ?>
+
+                    </span>
+                </div>
+                <div class="return-coupon">
+                    <span class="coupon-detail"><?php echo e($orderPresenter->getReward($order)); ?></span>
+                </div>
+            </div>
+            <div class="cannot-recycle">
+                <a href="/work/property/recycle-cannot/<?php echo e($order->id); ?>">无法回收？</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="next-step">
+        <a href="/work/property/recycle-step2/<?php echo e($order->id); ?>" class="btn_primary">下一步</a>
+    </div>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layout.weui', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

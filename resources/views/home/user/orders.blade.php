@@ -1,0 +1,54 @@
+@extends('layout.weui')
+
+@section('content')
+    <div class="order-container" id="orders">
+    </div>
+    <div class="load-more" id="load-btn">查看更多</div>
+@endsection
+
+@section('scripts')
+    @parent
+
+    {!! Html::script('/assets/home/js/paginator.js') !!}
+    <script>
+        function getOrderStatus(obj) {
+            if(obj.type != '以旧换新券' && obj.status == '已支付') {
+                return '待回收'
+            }
+            return obj.status
+        }
+
+        function getOrderReward(obj) {
+            if(obj.type == '有成本券') {
+                return '优惠券 ' + obj.type_coupon_with_trashed.coupon_with_trashed.name
+            } else if (obj.type == '以旧换新券') {
+                return '优惠券 ' + obj.type_coupon_with_trashed.coupon_with_trashed.name
+            } else {
+                return '现金红包￥' + obj.money
+            }
+        }
+
+        loadPaginator({
+            data_url: '/user/ajax-orders',
+            container: $("#orders"),
+            load_btn: $("#load-btn"),
+            format: function(obj) {
+                return $('<a class="task-item" href="/user/order/' + obj.id + '"></a>')
+                        .append($('<div class="recycle-product"></div>')
+                                .append('回收物品：')
+                                .append('<span class="p-name">' + obj.cfm_model.classification_with_trashed.name + '</span>')
+                                .append('<span class="p-type">' + obj.cfm_model.name + '</span>')
+                        )
+                        .append($('<div class="recycle-coupon"></div>')
+                                .append('返还优惠：')
+                                .append('<span class="p-coupon">' + getOrderReward(obj) + '</span>')
+                        )
+                        .append($('<div class="task-time"></div>')
+                                .append(obj.created_at)
+                                .append(obj.is_paid > 0 ? '(发放日期)' + obj.paid_at : '')
+                                .append("<span class='task-status'>"+getOrderStatus(obj)+"</span>")
+                        )
+            }
+        })
+    </script>
+@endsection

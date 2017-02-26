@@ -1,0 +1,33 @@
+
+<!-- sidebar: style can be found in sidebar.less -->
+<section class="sidebar">
+    <!-- sidebar menu: : style can be found in sidebar.less -->
+    <ul class="sidebar-menu">
+        <?php $menuParser = app('Icoming\Presenters\Admin\MenuParser'); ?>
+        <li class="header"><?php echo e($admin->role); ?></li>
+        <?php foreach(config('admin-menu.role.' . $admin->role, []) as $menu): ?>
+            <?php echo $menuParser->parse($menu); ?>
+
+        <?php endforeach; ?>
+        <li class="header">通用</li>
+        <?php foreach(config('admin-menu.global', []) as $menu): ?>
+            <?php echo $menuParser->parse($menu); ?>
+
+        <?php endforeach; ?>
+    </ul>
+</section>
+<!-- /.sidebar -->
+
+<?php $__env->startSection('scripts'); ?>
+    @parent
+    <script>
+        var curURI = '<?php echo e(isset($curURI) ? $curURI : Request::url()); ?>'
+        $(function() {
+            $(".sidebar-menu a").each(function () {
+                if($(this).attr('href') == curURI) {
+                    $(this).parent().addClass('active').parents('.treeview').addClass('active')
+                }
+            })
+        })
+    </script>
+<?php $__env->stopSection(); ?>

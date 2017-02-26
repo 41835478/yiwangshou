@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo e(isset($title) ? $title : '易网收'); ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+    <?php echo Html::style('assets/home/css/weui.css'); ?>
+
+    <?php echo Html::style('assets/home/css/main.css'); ?>
+
+    <?php echo $__env->yieldContent('styles'); ?>
+
+</head>
+<body ontouchstart="" class="scan-container">
+<div class="container">
+    <?php echo $__env->yieldContent('content'); ?>
+</div>
+
+<div id="toasts">
+
+</div>
+<?php echo Html::script('assets/home/js/jquery-1.10.2.js'); ?>
+
+<script>
+    toast = (function() {
+        var container = $("#toasts")
+        return function(msg, timer) {
+            var timer = timer || 1000
+            var toast = $('<div> <div class="weui_mask_transparent"></div> <div class="weui_toast"> <i class="weui_icon_toast"></i> <p class="weui_toast_content">' + msg + '</p> </div> </div>')
+            container.append(toast.fadeIn())
+            console.log(container.children())
+            setTimeout(function() {
+                toast.fadeOut(function() {
+                    toast.remove()
+                })
+            }, timer)
+        }
+    })()
+</script>
+<?php echo $__env->yieldContent('scripts'); ?>
+<?php if(isset($js)): ?>
+    <?php echo Html::script('http://res.wx.qq.com/open/js/jweixin-1.0.0.js'); ?>
+
+    <script>
+        wx.config(<?php echo $js->config(isset($apis) ? $apis : [], false); ?>)
+    </script>
+
+    <?php echo $__env->yieldContent('wx'); ?>
+<?php endif; ?>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<?php $__env->startSection('content'); ?>
+
+    <div class="header">
+        <div class="recycle-info">
+            <span>回收物品：</span>
+            <span class="r-name" id="classification_name"><?php echo e($type->classification->name); ?></span>
+            <span class="r-type" id="type_name"><?php echo e($type->name); ?></span>
+        </div>
+    </div>
+
+    <div class="coupon" id="coupon">
+        <?php foreach($coupons as $typecoupon): ?>
+            <div class="coupon-item clearfix" data-id="<?php echo e($typecoupon->id); ?>">
+                <div class="sk-img"> <i></i> </div><div class="q-type"><div class="q-name">
+                        <?php echo e($typecoupon->coupon->name); ?>
+
+                    </div><div class="q-txt">
+                        <?php echo e($typecoupon->coupon->remark); ?>
+
+                    </div></div><div class="q-money"><b class="semi-circle"></b><div class="q-price">
+                        <div><em>￥</em><?php echo e($typecoupon->coupon->value); ?></div><span>
+                            <?php echo e($typecoupon->coupon->ext_value > 0 ? "满{$typecoupon->coupon->ext_value}元可用" : '无限制条件'); ?>
+
+                        </span></div></div></div>
+        <?php endforeach; ?>
+            <div class="coupon-item clearfix" data-id="-<?php echo e($type->id); ?>">
+                <div class="sk-img"> <i></i> </div><div class="q-type"><div class="q-name">
+                        现金返还
+                    </div><div class="q-txt">
+                        商品回收成功后以微信转账的形式返还
+                    </div></div><div class="q-money"><b class="semi-circle"></b><div class="q-price">
+                        <div><em>￥</em><?php echo e($type->value); ?></div><span>
+                            微信转账
+                        </span></div></div></div>
+    </div>
+
+    <div class="next-step">
+        <a id="submit" class="btn_primary">下一步</a>
+    </div>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('scripts'); ?>
+    <script>
+        $(function () {
+            var type_coupon_id = 0
+
+            $(".coupon-item").click(function() {
+                $(this).addClass('active').siblings().removeClass('active')
+                type_coupon_id = 0
+                if($(this).hasClass('active')) {
+                    type_coupon_id = $(this).data('id')
+                }
+            })
+            $(".coupon-item").first().click()
+
+            $("#submit").click(function() {
+                if(type_coupon_id == 0) {
+                    toast('请选择优惠类型')
+                    return
+                }
+                window.location.replace('/order/step3/' + <?php echo e($is_unload); ?> + '/' + <?php echo e($coupon_id); ?> + '/' + type_coupon_id)
+            })
+        })
+    </script>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layout.weui', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

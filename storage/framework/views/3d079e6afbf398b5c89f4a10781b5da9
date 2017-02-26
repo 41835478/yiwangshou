@@ -1,0 +1,239 @@
+<?php $__env->startSection('content'); ?>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header">
+                    <h4>订单基础信息</h4>
+                </div>
+                <div class="box-body table-responsive">
+                    <table class="table table-responsive table-bordered">
+                        <tr>
+                            <th>订单编号</th>
+                            <td><?php echo e($order->number); ?></td>
+                            <th>订单类型</th>
+                            <td><?php echo e($order->type); ?></td>
+                            <th>订单状态</th>
+                            <td>
+                                <?php if($order->type == '以旧换新券'): ?>
+                                    <?php echo e($order->status); ?>
+
+                                <?php elseif($order->status == '已支付'): ?>
+                                    等待物业上门回收
+                                <?php else: ?>
+                                    <?php echo e($order->status); ?>
+
+                                <?php endif; ?>
+                            </td>
+                            <th>订单价值</th>
+                            <td><?php echo e($order->money); ?></td>
+                        </tr>
+                        <tr>
+                            <th>是否需要拆卸</th>
+                            <td><?php echo e($order->is_unload ? '是' : '否'); ?></td>
+                            <th>商品型号</th>
+                            <td><a href="/admin/type/edit/<?php echo e($order->modelWithTrashed->id); ?>"><?php echo e($order->modelWithTrashed->classificationWithTrashed->name.$order->modelWithTrashed->name); ?></a></td>
+                            <th>微信用户</th>
+                            <td>
+                                <?php if($order->user): ?>
+                                    <a href="/admin/user/role/<?php echo e($order->userWithTrashed->id); ?>"><?php echo e($order->userWithTrashed->nickname); ?></a>
+                                <?php else: ?>
+                                    无绑定用户
+                                <?php endif; ?>
+                            </td>
+                            <th>创建时间</th>
+                            <td><?php echo e($order->created_at); ?></td>
+                        </tr>
+                        <tr>
+                            <th>真实姓名</th>
+                            <td><?php echo e($order->name); ?></td>
+                            <th>联系方式</th>
+                            <td><?php echo e($order->mobile); ?></td>
+                            <th>小区名称</th>
+                            <td>
+                                <a href="/admin/plot/edit/<?php echo e($order->plotWithTrashed->id); ?>"><?php echo e($order->plotWithTrashed->name); ?></a>
+                                <?php /*<?php if($order->plot): ?>*/ ?>
+                                    <?php /*<a href="/admin/plot/edit/<?php echo e($order->plot->id); ?>"><?php echo e($order->plot->name); ?></a>*/ ?>
+                                <?php /*<?php else: ?>*/ ?>
+                                    <?php /*未绑定小区*/ ?>
+                                <?php /*<?php endif; ?>*/ ?>
+                            </td>
+                            <th>详细地址</th>
+                            <td><?php echo e($order->address); ?></td>
+                        </tr>
+                        <?php if($order->remarks): ?>
+                        <tr>
+                            <th>用户备注</th>
+                            <td colspan="7"><?php echo e($order->remarks); ?></td>
+                        </tr>
+                        <?php endif; ?>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="col-md-12">
+            <ul class="timeline">
+                <li class="time-label">
+                  <span class="bg-blue">
+                    <?php echo e($order->created_at); ?>
+
+                  </span>
+                </li>
+                <li>
+                    <i class="fa fa-user bg-blue"></i>
+                    <div class="timeline-item">
+                        <span class="time"><i class="fa fa-clock-o"></i> <?php echo e($order->created_at->diffForHumans()); ?></span>
+                        <h3 class="timeline-header no-border">
+                            <?php if($order->type == '协助下单'): ?>
+                                <a><?php echo e($order->name); ?></a> 预约了回收订单
+                            <?php else: ?>
+                                <a><?php echo e($order->userWithTrashed->nickname); ?></a> 预约了回收订单
+                            <?php endif; ?>
+                        </h3>
+                    </div>
+                </li>
+
+                <?php /*是否取消*/ ?>
+                <?php if($order->isCanceled()): ?>
+                    <li>
+                        <i class="fa fa-user"></i>
+                        <div class="timeline-item">
+                            <span class="time"><i class="fa fa-clock-o"></i> <?php echo e($order->updated_at->diffForHumans()); ?></span>
+                            <h3 class="timeline-header no-border"><a><?php echo e($order->userWithTrashed->nickname); ?></a> 取消了订单(取消原因:<?php echo e($order->cancel_reason); ?>)</h3>
+                        </div>
+                    </li>
+                <?php else: ?>
+                    <?php if($order->wechat_number): ?>
+                        <li>
+                            <i class="fa fa-user bg-aqua"></i>
+                            <div class="timeline-item">
+                                <span class="time"><i class="fa fa-clock-o"></i> <?php echo e((new \Carbon\Carbon($order->wechat_paid_at))->diffForHumans()); ?></span>
+                                <h3 class="timeline-header no-border"><a><?php echo e($order->userWithTrashed->nickname); ?></a> 支付订单(微信订单号:<?php echo e($order->wechat_number); ?>)</h3>
+
+                            </div>
+                        </li>
+                    <?php endif; ?>
+                    <?php if($order->isRefused()): ?>
+                        <li>
+                            <i class="fa fa-user bg-red"></i>
+                            <div class="timeline-item">
+                                <span class="time"><i class="fa fa-clock-o"></i> <?php echo e((new \Carbon\Carbon($order->property_at))->diffForHumans()); ?></span>
+                                <h3 class="timeline-header no-border">业务员 <a><?php echo e($order->property->nickname); ?></a> 拒绝回收订单(拒绝原因:<?php echo e($order->refused_reason); ?>)</h3>
+                            </div>
+                        </li>
+                    <?php else: ?>
+                        <?php if($order->property_id): ?>
+                            <?php /*已暂存*/ ?>
+                            <li>
+                                <i class="fa fa-user bg-yellow"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fa fa-clock-o"></i> <?php echo e((new \Carbon\Carbon($order->property_at))->diffForHumans()); ?></span>
+                                    <h3 class="timeline-header no-border">业务员 <a><?php echo e($order->property->nickname); ?>:<?php echo e($order->property->mobile); ?></a> 完成派单(商品编号:<?php echo e($order->code->code); ?>, 确认型号:<a href="/admin/type/edit/<?php echo e($order->cfmModel->id); ?>"><?php echo e($order->cfmModel->classificationWithTrashed->name.$order->cfmModel->name); ?>)</a></h3>
+                                    <div class="timeline-body">
+                                        <?php foreach($order->orderImages as $image): ?>
+                                            <img width="100" height="150" src="<?php echo config('qiniu.domain').'/'.$image->image; ?>" class="margin">
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </li>
+                        <?php endif; ?>
+                        <?php if($order->driver_id): ?>
+                            <?php /*正在运输中*/ ?>
+                            <li>
+                                <i class="fa fa-user bg-purple"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fa fa-clock-o"></i> <?php echo e((new \Carbon\Carbon($order->driver_at))->diffForHumans()); ?></span>
+                                    <h3 class="timeline-header no-border">司机 <a><?php echo e($order->driver->nickname); ?></a> 正在运输中</h3>
+                                </div>
+                            </li>
+                        <?php endif; ?>
+                        <?php if($order->in_id): ?>
+                            <?php /*已入库*/ ?>
+                            <li>
+                                <i class="fa fa-user bg-purple"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fa fa-clock-o"></i> <?php echo e((new \Carbon\Carbon($order->in_at))->diffForHumans()); ?></span>
+                                    <h3 class="timeline-header no-border">入库员 <a><?php echo e($order->in->nickname); ?></a> 操作入库</h3>
+                                </div>
+                            </li>
+                        <?php endif; ?>
+                        <?php if($order->out_id): ?>
+                            <li>
+                                <i class="fa fa-user bg-purple"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="fa fa-clock-o"></i> <?php echo e((new \Carbon\Carbon($order->out_at))->diffForHumans()); ?></span>
+                                    <h3 class="timeline-header no-border">出库员 <a><?php echo e($order->out->nickname); ?></a> 操作出库</h3>
+                                </div>
+                            </li>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </ul>
+        </div>
+
+        <?php if($admin->role == '超级管理员'): ?>
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h4>奖励发放(奖励发放金额不低于1元)</h4>
+                    </div>
+                    <div class="box-body table-responsive">
+                        <?php if($order->is_paid): ?>
+                            <h1 class="text-muted text-center">奖励已发放
+                                <?php if($order->type == '有成本券'): ?>
+                                    (优惠券码:<?php echo e($order->coupon_number); ?>)
+                                <?php else: ?>
+                                    (¥<?php echo e($order->cfm_money); ?>)
+                                <?php endif; ?>
+                            </h1>
+                        <?php elseif($order->status != '已入库' && $order->status != '暂存' && $order->status != '入库途中'  && $order->status != '已出库'): ?>
+                            <h2 class="text-muted text-center">目前无法发放奖励</h2>
+                            <p class="text-muted text-center">商品未入库</p>
+                        <?php else: ?>
+                            <?php echo Form::open([
+                                'url' => '/admin/order/pay/' . $order->id,
+                            ]); ?>
+
+                            <?php if($order->type == '有成本券'): ?>
+                                <?php echo Form::text('coupon_number', '', [
+                                    'placeholder' => '请输入发放的券号, 为空则自动从优惠券编码列表发放一个',
+                                    'class' => 'form-control',
+                                ]); ?>
+
+                            <?php else: ?>
+                                <?php echo Form::number('cfm_money', $order->cfm_money, [
+                                    'step' => 0.01,
+                                    'min' => 1.0,
+                                    'placeholder' => '请输入发放金额, 不低于1元',
+                                    'class' => 'form-control',
+                                    'required',
+                                    // 'max' => $order->money,
+                                ]); ?>
+
+                            <?php endif; ?>
+                            <?php echo Form::submit('确认发放', [
+                                'class' => 'btn btn-success'
+                            ]); ?>
+
+                            <?php echo Form::close(); ?>
+
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('scripts'); ?>
+    @parent
+    <script>
+        <?php if(session()->has('alert')): ?>
+            alert('<?php echo e(session()->get('alert')); ?>')
+        <?php endif; ?>
+    </script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layout.admin', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
